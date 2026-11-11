@@ -6,7 +6,7 @@
 
 Загружает все файлы сайта (кроме того, что в .gitignore) одним коммитом в ветку main.
 """
-import base64, fnmatch, json, pathlib, subprocess, sys, urllib.request
+import http.client, base64, fnmatch, json, pathlib, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REPO = sys.argv[1]
@@ -19,13 +19,20 @@ def call(method, url, body=None):
     req = urllib.request.Request(url, method=method, data=json.dumps(body).encode() if body is not None else None,
                                  headers={"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json",
                                           "User-Agent": "naglyadno-deploy"})
-    try:
-        with urllib.request.urlopen(req) as r:
-            return json.loads(r.read() or b"{}")
-    except urllib.error.HTTPError as e:
-        if e.code in (404, 409):
-            return None
-        raise SystemExit(f"{method} {url}: {e.code} {e.read().decode()[:300]}")
+    for attempt in range(6):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.loads(r.read() or b"{}")
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 409):
+                return None
+            if e.code >= 500 or e.code == 429:
+                time.sleep(3 * (attempt + 1)); continue
+            raise SystemExit(f"{method} {url}: {e.code} {e.read().decode()[:300]}")
+        except (OSError, http.client.HTTPException) as e:
+            print("  сеть, повтор:", e)
+            time.sleep(3 * (attempt + 1))
+    raise SystemExit(f"{method} {url}: GitHub не отвечает")
 
 
 def ignored(rel):

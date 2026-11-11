@@ -95,7 +95,7 @@
           <button class="ic main" id="bPlay" aria-label="Воспроизвести">${ICON.play}</button>
           <button class="ic" id="bNext" aria-label="Следующая реплика">${ICON.next}</button>
           <div class="timeline" id="tl"></div>
-          <button class="set-btn" id="bSet" aria-label="Голос и скорость"></button>
+          <button class="ic" id="bSet" aria-label="Звук: голос и скорость" title="Звук"></button>
         </div>
         <div class="sound glass" id="sound" hidden></div>
       </div>`;
@@ -106,7 +106,8 @@
     let portrait = false, W = 1280, H = 720;
     const manifest = g.AudioManifest && g.AudioManifest[L.id];
     const VOICE_NAMES = { dmitry: 'Дмитрий', svetlana: 'Светлана' };
-    let voice = prefs.voiceName || 'dmitry', rate = prefs.rate || 1, heard = false;
+    let voice = prefs.voiceName || (manifest && manifest.voices[0]) || 'dmitry', rate = prefs.rate || 1, heard = false;
+    if (manifest && manifest.voices.length && voice !== 'off' && !manifest.voices.includes(voice)) voice = manifest.voices[0];
     const audioUrl = (a, b) => {
       const h = manifest && manifest.lines[`${a}.${b}`];
       return h && voice !== 'off' ? `audio/${L.id}/${voice}/${h}.mp3` : null;
@@ -362,7 +363,7 @@
     function syncButtons() {
       $('bPlay').innerHTML = playing ? ICON.pause : ICON.play;
       $('bPlay').setAttribute('aria-label', playing ? 'Пауза' : 'Воспроизвести');
-      $('bSet').innerHTML = `${voice === 'off' ? ICON.off : ICON.on}<span class="long">${VOICE_NAMES[voice] || (voice === 'off' ? 'Без звука' : 'Голос')} ·</span><span>${String(rate).replace('.', ',')}×</span>`;
+      $('bSet').innerHTML = voice === 'off' ? ICON.off : ICON.on;
       $('hint').classList.toggle('in', started && !playing && !ended);
       wrap.classList.toggle('inspect', started && !playing);
       renderSound();

@@ -16,7 +16,7 @@ from pypdf import PdfReader, PdfWriter, Transformation
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = "http://localhost:8765/"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-VOICES = {"dmitry": "ru-RU-DmitryNeural", "svetlana": "ru-RU-SvetlanaNeural"}
+VOICES = {"svetlana": "ru-RU-SvetlanaNeural", "dmitry": "ru-RU-DmitryNeural"}
 
 
 def chrome(*args):
@@ -33,22 +33,26 @@ def export():
 
 
 async def speak(text, voice, path):
-    for attempt in range(8):
+    """True, если файл получен. Сервис иногда отказывает одному голосу: тогда этот голос пропускаем."""
+    for attempt in range(5):
         try:
             await edge_tts.Communicate(text, voice).save(str(path))
             if path.stat().st_size > 1000:
-                return
+                return True
         except Exception as e:
             print("  повтор:", e)
         await asyncio.sleep(3 * (attempt + 1))
-    sys.exit(f"Не удалось озвучить: {text}")
+    path.unlink(missing_ok=True)
+    print(f"  голос {voice} не отвечает на: {text[:50]}")
+    return False
 
 
 async def audio(lectures):
     manifest = {}
     for lec in lectures:
-        entry = {"voices": list(VOICES), "lines": {}, "pdf": {}}
+        entry = {"voices": [], "lines": {}, "pdf": {}}
         for name, voice in VOICES.items():
+            ok = True
             folder = ROOT / "audio" / lec["id"] / name
             folder.mkdir(parents=True, exist_ok=True)
             keep = set()
@@ -59,7 +63,13 @@ async def audio(lectures):
                 keep.add(path.name)
                 if not path.exists():
                     print(f"  {name} {line['key']}")
-                    await speak(line["say"], voice, path)
+                    if not await speak(line["say"], voice, path):
+                        ok = False
+                        break
+            if not ok:
+                print(f"  голос {name} пропущен, остальные файлы сохранены до следующей сборки")
+                continue
+            entry["voices"].append(name)
             for old in folder.glob("*.mp3"):
                 if old.name not in keep:
                     old.unlink()

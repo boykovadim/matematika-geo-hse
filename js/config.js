@@ -5,7 +5,7 @@ window.SITE = {
   creator: {
     name: 'Бойко Вадим',
     about: 'Сделал этот сайт для своей группы. Разрабатываю сайты и лендинги на заказ.',
-    url: '', /* например: 'https://example.com' */
+    url: 'https://boykovadim.github.io/',
     urlLabel: 'Мои сайты и лендинги',
   },
 };
