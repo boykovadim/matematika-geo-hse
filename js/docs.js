@@ -11,7 +11,7 @@
     const bar = document.createElement('div');
     bar.className = 'doc-bar';
     bar.innerHTML = `<p>${hint}</p>` + (has
-      ? `<a class="cta" href="${g.AudioManifest[L.id].pdf[kind]}" download="${label} — лекция ${L.n}.pdf">${DL}Скачать PDF</a>`
+      ? `<a class="cta" href="${g.AudioManifest[L.id].pdf[kind]}?v=${(document.querySelector('meta[name=build]') || {}).content || ''}" download="${label} — лекция ${L.n}.pdf">${DL}Скачать PDF</a>`
       : `<button class="cta" id="printDoc">${DL}Сохранить в PDF</button>`);
     view.appendChild(bar);
     const p = bar.querySelector('#printDoc');

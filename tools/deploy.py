@@ -6,7 +6,7 @@
 
 Загружает все файлы сайта (кроме того, что в .gitignore) одним коммитом в ветку main.
 """
-import http.client, base64, fnmatch, json, pathlib, subprocess, sys, time, urllib.request
+import http.client, base64, fnmatch, json, pathlib, re, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REPO = sys.argv[1]
@@ -44,6 +44,15 @@ def ignored(rel):
             return True
     return False
 
+
+# новая версия файлов: браузеры не возьмут старое из кэша, открытые вкладки тихо обновятся
+BUILD = time.strftime("%Y%m%d%H%M%S")
+index = ROOT / "index.html"
+html = index.read_text(encoding="utf8")
+html = re.sub(r'\?v=\w+"', f'?v={BUILD}"', html)
+html = re.sub(r'<meta name="build" content="\w+">', f'<meta name="build" content="{BUILD}">', html)
+index.write_text(html, encoding="utf8")
+print("Версия:", BUILD)
 
 files = sorted(p for p in ROOT.rglob("*") if p.is_file() and not ignored(p.relative_to(ROOT).as_posix()))
 files.append(ROOT / ".gitignore")

@@ -388,8 +388,26 @@
     else if (parts[0] === 'lecture') lecture(parts[1]);
     else home();
   }
+  /* ---------- тихое автообновление: без плашек ---------- */
+  const BUILD = (document.querySelector('meta[name=build]') || {}).content || 'dev';
+  let fresh = false;
+  async function checkBuild() {
+    if (BUILD === 'dev' || fresh) return;
+    try {
+      const html = await (await fetch('./?_=' + Date.now(), { cache: 'no-store' })).text();
+      const m = html.match(/<meta name="build" content="(\w+)">/);
+      if (m && m[1] !== BUILD) fresh = true;
+    } catch (e) { /* нет сети */ }
+  }
+  const reloadIfFresh = () => { if (fresh) location.reload(); };
+  addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') { await checkBuild(); reloadIfFresh(); }
+  });
+  setInterval(checkBuild, 5 * 60 * 1000);
+  checkBuild();
+
   renderTop();
   g.Glass.scan();
-  addEventListener('hashchange', route);
+  addEventListener('hashchange', () => { if (fresh) { location.reload(); return; } route(); });
   route();
 })(window);
