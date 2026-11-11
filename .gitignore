@@ -1,0 +1,6 @@
+.DS_Store
+11.11/
+.claude/
+CLAUDE.md
+__pycache__/
+*.pyc
