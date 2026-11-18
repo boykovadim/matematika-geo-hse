@@ -65,7 +65,7 @@
     off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z" fill="currentColor"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg>',
   };
   g.ICON = ICON;
-  const RATES = [.85, 1, 1.25, 1.5];
+  const RATES = [.85, 1, 1.25, 1.5, 2];
 
   g.Player = function (mount, L, store, hooks) {
     const scenes = L.scenes;
@@ -105,7 +105,7 @@
     let cur = null, i = 0, k = 0, playing = false, timer = null, cutS = null, cutting = false, started = false, ended = false, destroyed = false;
     let portrait = false, W = 1280, H = 720;
     const manifest = g.AudioManifest && g.AudioManifest[L.id];
-    const VOICE_NAMES = { dmitry: 'Дмитрий', svetlana: 'Светлана' };
+    const VOICE_NAMES = { xenia: 'Ксения', eugene: 'Евгений', dmitry: 'Дмитрий', svetlana: 'Светлана' };
     let voice = prefs.voiceName || (manifest && manifest.voices[0]) || 'dmitry', rate = prefs.rate || 1, heard = false;
     if (manifest && manifest.voices.length && voice !== 'off' && !manifest.voices.includes(voice)) voice = manifest.voices[0];
     const audioUrl = (a, b) => {
@@ -375,12 +375,13 @@
       const voices = manifest && manifest.voices.length ? [...manifest.voices, 'off'] : ['system', 'off'];
       const label = (v) => (v === 'off' ? 'Без звука' : v === 'system' ? 'Браузер' : VOICE_NAMES[v] || v);
       const isOn = (v) => v === voice || (v === 'system' && voice !== 'off');
-      box.innerHTML = `<b>Голос</b><div class="opts">${voices.map((v) => `<button data-v="${v}" class="${isOn(v) ? 'on' : ''}">${label(v)}</button>`).join('')}</div>
-        <b>Скорость</b><div class="opts">${RATES.map((r) => `<button data-r="${r}" class="${r === rate ? 'on' : ''}">${String(r).replace('.', ',')}×</button>`).join('')}</div>`;
+      box.innerHTML = `<b>Голос</b><div class="opts">${voices.map((v) => `<button data-v="${v}" class="${isOn(v) ? 'on' : ''}" aria-pressed="${isOn(v)}">${label(v)}</button>`).join('')}</div>
+        <b>Скорость</b><div class="opts">${RATES.map((r) => `<button data-r="${r}" class="${r === rate ? 'on' : ''}" aria-pressed="${r === rate}">${String(r).replace('.', ',')}×</button>`).join('')}</div>`;
       box.querySelectorAll('[data-v]').forEach((b) => (b.onclick = () => {
         voice = b.dataset.v === 'system' ? 'dmitry' : b.dataset.v;
         store.setPrefs({ voiceName: voice }); syncButtons();
-        if (playing) { hush(); clearTimeout(timer); narrate(); }
+        hush(); clearTimeout(timer); heard = false;
+        if (playing) narrate();
       }));
       box.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => {
         rate = +b.dataset.r; store.setPrefs({ rate }); Speaker.el.playbackRate = rate; syncButtons();

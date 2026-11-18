@@ -47,10 +47,29 @@ async def speak(text, voice, path):
     return False
 
 
-async def audio(lectures):
+def existing_audio(lectures):
+    path = ROOT / "audio" / "manifest.js"
+    saved = json.loads(path.read_text(encoding="utf8").split("=", 1)[1].strip().rstrip(";")) if path.exists() else {}
+    result = {}
+    for lec in lectures:
+        key = lec["id"]
+        lines = {line["key"]: hashlib.sha1(line["say"].encode()).hexdigest()[:10] for line in lec["lines"]}
+        voices = [
+            voice for voice in saved.get(key, {}).get("voices", [])
+            if all((ROOT / "audio" / key / voice / (digest + ".mp3")).is_file() for digest in lines.values())
+        ]
+        result[key] = {"voices": voices, "lines": lines, "pdf": {}}
+    return result
+
+
+async def audio(lectures, saved):
     manifest = {}
     for lec in lectures:
-        entry = {"voices": [], "lines": {}, "pdf": {}}
+        entry = saved[lec["id"]]
+        if any(voice not in VOICES for voice in entry["voices"]):
+            manifest[lec["id"]] = entry
+            continue
+        entry["voices"] = []
         for name, voice in VOICES.items():
             ok = True
             folder = ROOT / "audio" / lec["id"] / name
@@ -110,11 +129,9 @@ def write(manifest):
 
 lectures = export()
 print("Лекций:", len(lectures))
-if "--no-audio" in sys.argv:
-    # озвучку не трогаем: оставляем то, что уже есть в манифесте (или пусто)
-    m = {lec["id"]: {"voices": [], "lines": {}, "pdf": {}} for lec in lectures}
-else:
-    m = asyncio.run(audio(lectures))
+m = existing_audio(lectures)
+if "--no-audio" not in sys.argv:
+    m = asyncio.run(audio(lectures, m))
 pdfs(lectures, m)
 write(m)
 print("Готово")

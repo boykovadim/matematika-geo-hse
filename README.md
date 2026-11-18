@@ -5,3 +5,5 @@
 Сайт: https://boykovadim.github.io/matematika-geo-hse/
 
 Студенческий учебный проект, не официальный сайт НИУ ВШЭ. Создатель: Бойко Вадим.
+
+Озвучка лекций создана с помощью [Silero Models](https://github.com/snakers4/silero-models), модель v5_ru ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)).

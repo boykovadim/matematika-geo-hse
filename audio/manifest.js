@@ -1,7 +1,8 @@
 window.AudioManifest = {
  "matricy": {
   "voices": [
-   "svetlana"
+   "xenia",
+   "eugene"
   ],
   "lines": {
    "0.0": "995a13dd9a",
@@ -90,6 +91,42 @@ window.AudioManifest = {
   "pdf": {
    "notes": "pdf/matricy-konspekt.pdf",
    "sheet": "pdf/matricy-shpora.pdf"
+  }
+ },
+ "opredelitel-i-rang": {
+  "pdf": {},
+  "voices": [
+   "xenia",
+   "eugene"
+  ],
+  "lines": {
+   "0.0": "07a9ed140d",
+   "0.1": "0ed1e4f13b",
+   "0.2": "8a258b75ec",
+   "1.0": "d4f4532dcb",
+   "1.1": "a7405a39a6",
+   "1.2": "c9c1fb8eb8",
+   "2.0": "4c649dbb12",
+   "2.1": "9ecb060534",
+   "2.2": "2eaa5dec70",
+   "3.0": "94f5f51d6b",
+   "3.1": "2a6d032477",
+   "3.2": "68c2b7e5fa",
+   "4.0": "8af32fe097",
+   "4.1": "78b2827e87",
+   "4.2": "d34448adb6",
+   "5.0": "32d3b64296",
+   "5.1": "05af6f4ebf",
+   "5.2": "1332a624a1",
+   "6.0": "aa54a2ff92",
+   "6.1": "8b31232b79",
+   "6.2": "26b7ca7069",
+   "7.0": "be76eb47e8",
+   "7.1": "a76b458f29",
+   "7.2": "ba375bb8a8",
+   "8.0": "890b1a7d79",
+   "8.1": "e42e88d59a",
+   "8.2": "618d0ddb76"
   }
  }
 };
